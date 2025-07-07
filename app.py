@@ -13,6 +13,16 @@ from email_utils import send_email
 from job_database import create_job_table, add_job, get_all_jobs
 from fpdf import FPDF  # <-- Added import for PDF generation
 
+import spacy
+import subprocess
+import importlib.util
+
+# Check and download the spaCy model if not found
+if importlib.util.find_spec("en_core_web_sm") is None:
+    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+
+nlp = spacy.load("en_core_web_sm")
+
 # ---- Constants ----
 INTERVIEW_QUESTIONS = {
     "python": [
