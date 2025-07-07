@@ -3,3 +3,4 @@ pdfplumber
 spacy
 openai
 scikit-learn
+python-dotenv
