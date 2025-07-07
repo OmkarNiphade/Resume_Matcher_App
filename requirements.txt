@@ -4,3 +4,4 @@ spacy
 openai
 scikit-learn
 python-dotenv
+fpdf
