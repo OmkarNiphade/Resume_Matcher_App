@@ -5,3 +5,4 @@ openai
 scikit-learn
 python-dotenv
 fpdf
+en_core_web_sm

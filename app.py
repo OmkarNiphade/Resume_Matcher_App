@@ -11,18 +11,14 @@ import os
 
 from email_utils import send_email
 from job_database import create_job_table, add_job, get_all_jobs
-from fpdf import FPDF  # <-- Added import for PDF generation
+from fpdf import FPDF  # PDF generation
 
-import spacy
-import subprocess
-import importlib.util
-
-# Check if the model is already available
+# Ensure spaCy model is installed and downloaded
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
-    # If not, download it
-    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+    from spacy.cli import download as spacy_download
+    spacy_download("en_core_web_sm")
     nlp = spacy.load("en_core_web_sm")
 
 # ---- Constants ----
@@ -48,14 +44,11 @@ PORTFOLIO_FILE = "portfolio.csv"
 # ---- Page Config ----
 st.set_page_config(page_title="Resume & Job Match Analyzer", layout="wide")
 
-# ---- Load NLP Model ----
-nlp = spacy.load("en_core_web_sm")
-
 # ---- Sidebar Navigation ----
 st.sidebar.title("🔍 Navigation")
 selected_page = st.sidebar.radio("Go to", ["🏠 Home", "📝 Apply Now", "📋 Application Status"])
 
-with st.sidebar.expander("📈 Stats"):
+with st.sidebar.expander("📊 Stats"):
     app_count = len(open(APPLICATIONS_FILE).readlines()) - 1 if os.path.exists(APPLICATIONS_FILE) else 0
     st.markdown(f"**Total Applications:** {app_count}")
 
@@ -167,12 +160,10 @@ def load_applications():
         reader = csv.DictReader(f)
         return list(reader)
 
-# ---- PDF Save Function (Unicode font) ----
 def save_text_as_pdf(text, filename):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
-    # Use your uploaded DejaVu font file (update path if needed)
     pdf.add_font('DejaVu', '', '/mnt/data/00ae9d37-0ff1-4cb4-b7f8-2d3bf033f85b.ttf', uni=True)
     pdf.set_font("DejaVu", size=12)
     for line in text.split('\n'):
@@ -196,7 +187,6 @@ def application_form(prefill_data=None, job_info=None):
         education = st.text_area("Education Details", placeholder="Enter your education background...")
         experience = st.text_area("Work Experience", placeholder="Enter your work experience...")
 
-        # Job info inputs - prefilled if job_info passed
         job_title = st.text_input("Job Title", value=job_info.get("title", "") if job_info else "")
         job_company = st.text_input("Company Name", value=job_info.get("company", "") if job_info else "")
         job_location = st.text_input("Job Location", value=job_info.get("location", "") if job_info else "")
@@ -291,8 +281,7 @@ def main_page():
         st.markdown(f"✅ Matched Keywords:\n\n{matched_str}", unsafe_allow_html=True)
         st.markdown(f"❌ Missing Keywords:\n\n{missing_str}", unsafe_allow_html=True)
 
-        # === Added Save PDF button here ===
-        if st.button("💾 Save Resume as PDF"):
+        if st.button("📂 Save Resume as PDF"):
             save_folder = "saved_resumes"
             os.makedirs(save_folder, exist_ok=True)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -315,7 +304,6 @@ def main_page():
                 "company": "N/A",
                 "location": "N/A"
             }
-            # For demo, you might want to extract job title/company/location from job_desc or input separately.
             st.session_state["application_info"] = (basic_info, job_info)
             st.experimental_rerun()
 
